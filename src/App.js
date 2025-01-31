@@ -29,6 +29,12 @@ const App = () => {
     setTasks(tasks.filter(task => task.id !== id));
   };
 
+  const updateTask = (id, newDescription) => {
+    setTasks(tasks.map(task =>
+      task.id === id ? { ...task, description: newDescription } : task
+    ));
+  };
+
   const clearCompleted = () => {
     setTasks(tasks.filter(task => !task.completed));
   };
@@ -48,7 +54,7 @@ const App = () => {
         <NewTaskForm onAddTask={addTask} />
       </header>
       <section className="main">
-        <TaskList tasks={filteredTasks} onToggle={toggleTaskCompletion} onDelete={deleteTask} />
+        <TaskList tasks={filteredTasks} onToggle={toggleTaskCompletion} onDelete={deleteTask} onUpdate={updateTask} />
         <Footer filter={filter} setFilter={setFilter} activeCount={activeTaskCount} onClearCompleted={clearCompleted} />
       </section>
     </section>
