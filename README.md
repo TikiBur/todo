@@ -1,1 +1,1 @@
-https://todo-app-zeta-olive.vercel.app/
+todo-app-zeta-olive.vercel.app
