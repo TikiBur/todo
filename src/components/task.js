@@ -1,10 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { formatDistanceToNow } from 'date-fns';
-
-const Task = ({ task, onToggle, onDelete, onUpdate }) => {
+const Task = ({ task, onToggle, onDelete, onUpdate, onToggleTimer }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedDescription, setEditedDescription] = useState(task.description);
+  const [elapsedTime, setElapsedTime] = useState(task.timeSpent || 0);
+  const [isRunning, setIsRunning] = useState(task.isRunning || false);
+
+  useEffect(() => {
+    let timer;
+    if (isRunning) {
+      timer = setInterval(() => {
+        setElapsedTime(prev => prev + 1);
+      }, 1000);
+    } else {
+      clearInterval(timer);
+    }
+    return () => clearInterval(timer);
+  }, [isRunning]);
+
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const sec = seconds % 60;
+    return `${minutes}:${sec < 10 ? '0' : ''}${sec}`;
+  };
 
   const handleEditClick = () => {
     setIsEditing(true);
@@ -25,6 +44,11 @@ const Task = ({ task, onToggle, onDelete, onUpdate }) => {
     if (e.key === 'Enter') {
       handleBlur();
     }
+  };
+
+  const toggleTimer = () => {
+    setIsRunning(!isRunning);
+    onToggleTimer(task.id, !isRunning, elapsedTime);
   };
 
   return (
@@ -48,8 +72,12 @@ const Task = ({ task, onToggle, onDelete, onUpdate }) => {
             />
           ) : (
             <>
-              <span className="description">{task.description}</span>
-              <span className="created">created {formatDistanceToNow(task.created, { addSuffix: true })}</span>
+              <span className="title">{task.description}</span>
+              <span className="description">
+                <button className={`icon ${isRunning ? 'icon-pause' : 'icon-play'}`} onClick={toggleTimer}></button>
+                {formatTime(elapsedTime)}
+              </span>
+              <span className="description">created {formatDistanceToNow(task.created, { addSuffix: true })}</span>
             </>
           )}
         </label>
@@ -66,18 +94,13 @@ Task.propTypes = {
     description: PropTypes.string.isRequired,
     completed: PropTypes.bool.isRequired,
     created: PropTypes.instanceOf(Date).isRequired,
+    timeSpent: PropTypes.number,
+    isRunning: PropTypes.bool,
   }).isRequired,
   onToggle: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
   onUpdate: PropTypes.func.isRequired,
-};
-
-Task.defaultProps = {
-  task: {
-    description: 'New Task',
-    completed: false,
-    created: new Date(),
-  },
+  onToggleTimer: PropTypes.func.isRequired,
 };
 
 export default Task;

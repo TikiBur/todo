@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import TaskList from './components/task-list';
 import NewTaskForm from './components/new-task-form';
@@ -39,11 +39,27 @@ const App = () => {
     setTasks(tasks.filter(task => !task.completed));
   };
 
+  const toggleTimer = (id) => {
+    setTasks(tasks.map(task =>
+      task.id === id ? { ...task, isRunning: !task.isRunning } : task
+    ));
+  };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTasks(tasks => tasks.map(task =>
+        task.isRunning ? { ...task, timeSpent: task.timeSpent + 1 } : task
+      ));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const filteredTasks = tasks.filter(task => {
     if (filter === FILTERS.ACTIVE) return !task.completed;
     if (filter === FILTERS.COMPLETED) return task.completed;
     return true;
-  });
+  }); 
 
   const activeTaskCount = tasks.filter(task => !task.completed).length;
 
@@ -54,8 +70,19 @@ const App = () => {
         <NewTaskForm onAddTask={addTask} />
       </header>
       <section className="main">
-        <TaskList tasks={filteredTasks} onToggle={toggleTaskCompletion} onDelete={deleteTask} onUpdate={updateTask} />
-        <Footer filter={filter} setFilter={setFilter} activeCount={activeTaskCount} onClearCompleted={clearCompleted} />
+        <TaskList 
+          tasks={filteredTasks} 
+          onToggle={toggleTaskCompletion} 
+          onDelete={deleteTask} 
+          onUpdate={updateTask} 
+          onToggleTimer={toggleTimer}
+        />
+        <Footer 
+          filter={filter} 
+          setFilter={setFilter} 
+          activeCount={activeTaskCount} 
+          onClearCompleted={clearCompleted} 
+        />
       </section>
     </section>
   );
