@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { formatDistanceToNow } from 'date-fns';
+
 const Task = ({ task, onToggle, onDelete, onUpdate, onToggleTimer }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedDescription, setEditedDescription] = useState(task.description);
@@ -18,6 +19,11 @@ const Task = ({ task, onToggle, onDelete, onUpdate, onToggleTimer }) => {
     }
     return () => clearInterval(timer);
   }, [isRunning]);
+
+  useEffect(() => {
+    setElapsedTime(task.timeSpent);
+    setIsRunning(task.isRunning);
+  }, [task]);
 
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
@@ -48,7 +54,7 @@ const Task = ({ task, onToggle, onDelete, onUpdate, onToggleTimer }) => {
 
   const toggleTimer = () => {
     setIsRunning(!isRunning);
-    onToggleTimer(task.id, !isRunning, elapsedTime);
+    onToggleTimer(task.id);
   };
 
   return (

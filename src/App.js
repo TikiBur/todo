@@ -11,12 +11,32 @@ const FILTERS = {
   COMPLETED: 'Completed',
 };
 
+const LOCAL_STORAGE_KEY = 'todoTasks';
+
 const App = () => {
   const [tasks, setTasks] = useState([]);
   const [filter, setFilter] = useState(FILTERS.ALL);
 
-  const addTask = (description) => {
-    setTasks([...tasks, { id: Date.now(), description, completed: false, created: new Date() }]);
+  useEffect(() => {
+    const savedTasks = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY));
+    if (savedTasks) {
+      setTasks(savedTasks);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tasks));
+  }, [tasks]);
+
+  const addTask = (description, timeSpent = 0) => {
+    setTasks([...tasks, { 
+      id: Date.now(), 
+      description, 
+      completed: false, 
+      created: new Date(),
+      timeSpent,
+      isRunning: true 
+    }]);
   };
 
   const toggleTaskCompletion = (id) => {
@@ -59,7 +79,7 @@ const App = () => {
     if (filter === FILTERS.ACTIVE) return !task.completed;
     if (filter === FILTERS.COMPLETED) return task.completed;
     return true;
-  }); 
+  });
 
   const activeTaskCount = tasks.filter(task => !task.completed).length;
 
