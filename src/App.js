@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 import TaskList from './components/task-list';
 import NewTaskForm from './components/new-task-form';
 import Footer from './components/footer';
@@ -28,15 +27,18 @@ const App = () => {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(tasks));
   }, [tasks]);
 
-  const addTask = (description, timeSpent = 0) => {
-    setTasks([...tasks, { 
-      id: Date.now(), 
-      description, 
-      completed: false, 
-      created: new Date(),
-      timeSpent,
-      isRunning: true 
-    }]);
+  const addTask = (description, timeSpent = 300) => {
+    setTasks([
+      ...tasks,
+      {
+        id: Date.now(),
+        description,
+        completed: false,
+        created: new Date(),
+        remainingTime: timeSpent,
+        isRunning: false,
+      },
+    ]);
   };
 
   const toggleTaskCompletion = (id) => {
@@ -68,12 +70,12 @@ const App = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       setTasks(tasks => tasks.map(task =>
-        task.isRunning ? { ...task, timeSpent: task.timeSpent + 1 } : task
+        task.isRunning ? { ...task, remainingTime: task.remainingTime - 1 } : task
       ));
     }, 1000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [tasks]);
 
   const filteredTasks = tasks.filter(task => {
     if (filter === FILTERS.ACTIVE) return !task.completed;

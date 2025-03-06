@@ -25,7 +25,6 @@ const NewTaskForm = ({ onAddTask }) => {
       <input
         className="new-todo"
         placeholder="Task"
-        autofocus
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         autoFocus
@@ -33,7 +32,6 @@ const NewTaskForm = ({ onAddTask }) => {
       <input
         className="new-todo-form__timer"
         placeholder="Min"
-        autofocus
         type="number"
         min="0"
         value={minutes}
@@ -42,7 +40,6 @@ const NewTaskForm = ({ onAddTask }) => {
       <input
         className="new-todo-form__timer"
         placeholder="Sec"
-        autofocus
         type="number"
         min="0"
         max="59"

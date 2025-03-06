@@ -5,27 +5,31 @@ import { formatDistanceToNow } from 'date-fns';
 const Task = ({ task, onToggle, onDelete, onUpdate, onToggleTimer }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedDescription, setEditedDescription] = useState(task.description);
-  const [elapsedTime, setElapsedTime] = useState(task.timeSpent || 0);
+  const [remainingTime, setRemainingTime] = useState(task.remainingTime || 300); 
   const [isRunning, setIsRunning] = useState(task.isRunning || false);
 
   useEffect(() => {
     let timer;
-    if (isRunning) {
+    if (isRunning && remainingTime > 0) {
       timer = setInterval(() => {
-        setElapsedTime(prev => prev + 1);
+        setRemainingTime((prevTime) => prevTime - 1);
       }, 1000);
-    } else {
-      clearInterval(timer);
+    } else if (remainingTime <= 0) {
+      setIsRunning(false);
     }
+
     return () => clearInterval(timer);
-  }, [isRunning]);
+  }, [isRunning, remainingTime]);
 
   useEffect(() => {
-    setElapsedTime(task.timeSpent);
-    setIsRunning(task.isRunning);
+    if (task.remainingTime !== undefined && !isNaN(task.remainingTime)) {
+      setRemainingTime(task.remainingTime);
+    }
+    setIsRunning(task.isRunning || false); 
   }, [task]);
 
   const formatTime = (seconds) => {
+    if (seconds < 0) return '00:00'; 
     const minutes = Math.floor(seconds / 60);
     const sec = seconds % 60;
     return `${minutes}:${sec < 10 ? '0' : ''}${sec}`;
@@ -53,8 +57,8 @@ const Task = ({ task, onToggle, onDelete, onUpdate, onToggleTimer }) => {
   };
 
   const toggleTimer = () => {
-    setIsRunning(!isRunning);
-    onToggleTimer(task.id);
+    setIsRunning(!isRunning); 
+    onToggleTimer(task.id); 
   };
 
   return (
@@ -81,7 +85,7 @@ const Task = ({ task, onToggle, onDelete, onUpdate, onToggleTimer }) => {
               <span className="title">{task.description}</span>
               <span className="description">
                 <button className={`icon ${isRunning ? 'icon-pause' : 'icon-play'}`} onClick={toggleTimer}></button>
-                {formatTime(elapsedTime)}
+                {formatTime(remainingTime)} 
               </span>
               <span className="description">created {formatDistanceToNow(task.created, { addSuffix: true })}</span>
             </>
@@ -100,7 +104,7 @@ Task.propTypes = {
     description: PropTypes.string.isRequired,
     completed: PropTypes.bool.isRequired,
     created: PropTypes.instanceOf(Date).isRequired,
-    timeSpent: PropTypes.number,
+    remainingTime: PropTypes.number, 
     isRunning: PropTypes.bool,
   }).isRequired,
   onToggle: PropTypes.func.isRequired,
